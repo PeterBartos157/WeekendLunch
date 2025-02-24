@@ -1,0 +1,73 @@
+.week-list-container {
+  margin: 20px;
+  font-family: Arial, sans-serif;
+
+  h2 {
+    font-size: 24px;
+    margin-bottom: 20px;
+  }
+
+  .week-entry {
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  input {
+    padding: 5px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+  }
+
+  .notes ul {
+    list-style-type: none;
+    padding-left: 0;
+    display: flex;
+    flex-wrap: wrap;
+  }
+
+  .note {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: rgb(168, 168, 168);
+    color: white;
+    padding-left: 5px;
+    padding-top: 3px;
+    padding-bottom: 3px;
+    border-radius: 10px;
+    margin-right: 5px;
+  }
+
+  .note-won {
+    background-color: rgb(74, 190, 74);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: white;
+    padding-left: 5px;
+    padding-top: 3px;
+    padding-bottom: 3px;
+    border-radius: 10px;
+    margin-right: 5px;
+  }
+
+  .past-note {
+    padding-right: 10px;
+  }
+
+  .remove-btn {
+    border: none;
+    background-color: transparent;
+    cursor: pointer;
+    color: red;
+  }
+
+  .remove-btn span:hover {
+    background-color: rgb(150, 150, 150);
+    border-radius: 10px;
+    padding-top: 2px;
+    padding-bottom: 2px;
+  }
+}

@@ -1,0 +1,49 @@
+/* Overall layout */
+.container {
+  font-family: 'Arial', sans-serif;
+  display: flex;
+  flex-direction: column;
+  height: 50vh;
+  background-color: #ffffff;
+  color: #333;
+  padding-top: 80px; /* Space for fixed header */
+  padding-bottom: 60px; /* Space for fixed footer */
+}
+
+/* Header styling */
+.header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  background-color: #7c9a92; /* soft green, evokes freshness */
+  color: white;
+  text-align: center;
+  padding: 10px;
+  font-size: 2em;
+  z-index: 1000; /* Ensure it stays above other content */
+}
+
+/* Content area */
+.content {
+  flex: 1;
+  padding: 20px;
+  background-color: #ffffff; /* clean white background */
+  border-top: 2px solid #7c9a92; /* separating header from content */
+  margin-top: 80px; /* Space for fixed header */
+  margin-bottom: 60px; /* Space for fixed footer */
+}
+
+/* Footer styling */
+.footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background-color: #2a4d33; /* dark earthy green */
+  color: white;
+  text-align: center;
+  padding: 10px;
+  font-size: 1.2em;
+  z-index: 1000; /* Ensure it stays above other content */
+}

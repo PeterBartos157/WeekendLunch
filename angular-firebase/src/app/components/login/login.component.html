@@ -1,0 +1,12 @@
+<div class="login-container">
+  <h2 class="login-h">Prihlásiť sa ➡️🔓</h2>
+
+  <div class="error-message" [style.color]="feedbackMessageColor">
+    {{ feedbackMessage }}
+  </div>
+
+  <button (click)="signIn()">cez Gmail 📧</button>
+  <div class="login-subtext">
+    <span>Potrebné pre overenie totožnosti, že si Bartoš 😉</span>
+  </div>
+</div>
