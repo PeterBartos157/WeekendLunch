@@ -1,4 +1,4 @@
-import { Firestore, collection, setDoc, getDoc, getDocs, doc, updateDoc } from '@angular/fire/firestore';
+import { Firestore, collection, setDoc, getDoc, doc, updateDoc, onSnapshot } from '@angular/fire/firestore';
 import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -12,8 +12,26 @@ import { Auth } from '@angular/fire/auth';
   styleUrls: ['./dashboard.component.scss']
 })
 export class DashboardComponent implements OnInit {
-  weeks: { week: number, dateRange: string, notes: string[], won: string }[] = [];
-  maxNoteLength: number = 4;
+  // Tooltip on hover
+  tooltipVisible: boolean = false;
+  tooltipText: string = '';
+  tooltipX: number = 0;
+  tooltipY: number = 0;
+  // Input logic
+  disableInput: boolean = false;
+  maxNoteTextLength: number = 25;
+  maxNoteLength: number = 5;
+  // Week logic
+  weeks: {
+    week: number,
+    dateRange: string,
+    notes: {
+      text: string,
+      creator: string,
+      voters: string[]
+    }[],
+    won: string
+  }[] = [];
   currentText: string = '';
   currentWeek: number = 0;
   currentYear: number = 0;
@@ -22,6 +40,7 @@ export class DashboardComponent implements OnInit {
   monthsInSlovak = [
     'januára', 'februára', 'marca', 'apríla', 'mája', 'júna', 'júla', 'augusta', 'septembra', 'októbra', 'novembra', 'decembra'
   ];
+  // firebase logic
   auth: Auth = inject(Auth);
   email: string = this.auth.currentUser?.email ?? '';
   firestore: Firestore = inject(Firestore);
@@ -34,7 +53,6 @@ export class DashboardComponent implements OnInit {
     this.currentMonth = this.monthsInSlovak[currentDate.getMonth()];
     this.currentWeek = this.getWeekNumber(currentDate);
     this.generateWeeks(currentDate);
-    console.log(this.email);
   }
 
   async ngOnInit() {
@@ -78,27 +96,48 @@ export class DashboardComponent implements OnInit {
     }
   }
 
-
   // Fetch notes from Firestore for each week
   async fetchNotes(): Promise<void> {
     const currentYear = this.currentYear.toString();
     const weeksRef = collection(this.firestore, this.collectionName);
-    const querySnapshot = await getDocs(weeksRef);
-    querySnapshot.forEach((doc) => {
-      const dbWeek = doc.data();
-      const dbWeekString = dbWeek['week'].toString();
-      const foundWeek = this.weeks.find(w => w.week.toString() + '-' + currentYear === dbWeekString);
-      if (foundWeek) {
-        foundWeek.notes = dbWeek['notes'] || [];
-        foundWeek.won = dbWeek['won'] || '';
-      }
+    // Listener on data changes
+    onSnapshot(weeksRef, (querySnapshot) => {
+      querySnapshot.forEach((doc) => {
+        const dbWeek = doc.data();
+        const dbWeekString = dbWeek['week'].toString();
+        const foundWeek = this.weeks.find(w => w.week.toString() + '-' + currentYear === dbWeekString);
+        // if found a record
+        if (foundWeek) {
+          foundWeek.notes = dbWeek['notes'] || [];
+          foundWeek.won = dbWeek['won'] || '';
+        }
+      });
     });
   }
 
+  createNote(
+    notes: {text: string, creator: string, voters: string[]}[],
+    noteText: string,
+    email: string
+  ): {text: string, creator: string, voters: string[]} | null {
+    // Validation for duplicate notes
+    if (notes.some(n => n.text === noteText)) return null;
+    // Validation for max limit of string
+    if (noteText.length > this.maxNoteTextLength)
+      noteText = noteText.slice(0, this.maxNoteTextLength);
+    return {text: noteText, creator: email, voters: []}
+  }
+
   // Add note to specific week
-  async addNoteToWeek(weekNumber: number, note: string): Promise<void> {
+  async addNoteToWeek(weekNumber: number, noteText: string): Promise<void> {
+    // Disable field while working
+    this.disableInput = true;
     const week = this.weeks.find(w => w.week === weekNumber);
+    // If notes are not at limit
     if (week && week.notes.length < this.maxNoteLength) {
+      const newNote = this.createNote(week.notes, noteText, this.email);
+      const backupNotes = Array.from(week.notes);
+      if (newNote) week.notes.push(newNote);
       try {
         const weekRef: string = `${weekNumber.toString()}-${this.currentYear.toString()}`;
         // Put into firestore
@@ -107,6 +146,7 @@ export class DashboardComponent implements OnInit {
         const weekDocSnapshot = await getDoc(weekDocRef);
         // Document exists, so we update it
         if (weekDocSnapshot.exists()) {
+          // throw new Error("Error");
           await updateDoc(weekDocRef, {
             notes: week.notes
           });
@@ -114,23 +154,25 @@ export class DashboardComponent implements OnInit {
         } else {
           await setDoc(weekDocRef, {
             week: weekRef,
-            notes: [note],
+            notes: [newNote],
             won: ''
           });
         }
-        week.notes.push(note);
         this.currentText = '';
-      } catch {
-
+      } catch(error: any) {
+        week.notes = backupNotes;
+        console.error(error);
       }
     }
+    // Enable field after work is done
+    this.disableInput = false;
   }
 
   // Remove note from a specific week
-  async removeNoteFromWeek(weekNumber: number, note: string): Promise<void> {
+  async removeNoteFromWeek(weekNumber: number, noteText: string): Promise<void> {
     const week = this.weeks.find(w => w.week === weekNumber);
     if (week) {
-      week.notes = week.notes.filter(n => n !== note);
+      week.notes = week.notes.filter(note => note.text !== noteText);
       // Remove from firestre
       const weekDocRef = doc(this.firestore, this.collectionName, `${weekNumber.toString()}-${this.currentYear.toString()}`);
       await updateDoc(weekDocRef, {
@@ -138,4 +180,48 @@ export class DashboardComponent implements OnInit {
       });
     }
   }
+
+  // Vote for note from a specific week
+  async voteForNoteFromWeek(weekNumber: number, note: {text: string, creator: string, voters: string[]} ): Promise<void> {
+    const week = this.weeks.find(w => w.week === weekNumber);
+    if (week) {
+      const userEmail = this.email;
+      console.log(note);
+      // Remove vote if already voted for this note
+      if (note.voters.includes(userEmail)) note.voters = note.voters.filter(voter => voter !== userEmail);
+      // Add note if user has not voted for this note yet
+      else note.voters.push(userEmail);
+      console.log(note);
+      // Remove from firestre
+      const weekDocRef = doc(this.firestore, this.collectionName, `${weekNumber.toString()}-${this.currentYear.toString()}`);
+      await updateDoc(weekDocRef, {
+        notes: week.notes
+      });
+    }
+  }
+
+  haveCreatedNote(creator: string): boolean {
+    return this.email === creator;
+  }
+
+  haveVotedFor(note: {text: string, creator: string, voters: string[]}): boolean {
+    return note.voters.includes(this.email);
+  }
+
+  showTooltip(event: MouseEvent, text: string, type: number = 0) {
+    if (type === 1) // pre emaily (creator)
+      this.tooltipText = 'vytvoril používateľ ' + text.slice(0, text.indexOf('@'));
+    else if (type === 2)
+      this.tooltipText = 'počet hlasov: ' + text;
+    else // pre obycajne texty
+      this.tooltipText = text;
+    this.tooltipX = event.pageX + 10;
+    this.tooltipY = event.pageY + 10;
+    this.tooltipVisible = true;
+  }
+
+  hideTooltip() {
+    this.tooltipVisible = false;
+  }
+
 }

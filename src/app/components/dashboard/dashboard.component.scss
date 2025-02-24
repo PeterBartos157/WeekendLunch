@@ -20,6 +20,9 @@
     border: 1px solid #ccc;
   }
 
+  .input-warning::placeholder {
+    color: red;
+  }
   .notes ul {
     list-style-type: none;
     padding-left: 0;
@@ -32,6 +35,19 @@
     justify-content: space-between;
     align-items: center;
     background-color: rgb(168, 168, 168);
+    color: white;
+    padding-left: 5px;
+    padding-top: 3px;
+    padding-bottom: 3px;
+    border-radius: 10px;
+    margin-right: 5px;
+  }
+
+  .note-voted {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: rgb(103, 148, 180);
     color: white;
     padding-left: 5px;
     padding-top: 3px;
@@ -57,6 +73,27 @@
     padding-right: 10px;
   }
 
+  .blocked-btn {
+    border: none;
+    background-color: transparent;
+    cursor: not-allowed;
+    color: rgb(255, 255, 255);
+  }
+
+  .vote-btn {
+    border: none;
+    background-color: transparent;
+    cursor: pointer;
+    color: rgb(255, 255, 255);
+  }
+
+  .vote-btn span:hover {
+    background-color: rgb(210, 210, 210);
+    border-radius: 10px;
+    padding-top: 2px;
+    padding-bottom: 2px;
+  }
+
   .remove-btn {
     border: none;
     background-color: transparent;
@@ -65,9 +102,21 @@
   }
 
   .remove-btn span:hover {
-    background-color: rgb(150, 150, 150);
+    background-color: rgb(180, 150, 150);
     border-radius: 10px;
     padding-top: 2px;
     padding-bottom: 2px;
+  }
+
+  .tooltip {
+    position: absolute;
+    background-color: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 5px 10px;
+    border-radius: 5px;
+    font-size: 12px;
+    white-space: nowrap;
+    z-index: 1000;
+    pointer-events: none; // Prevent blocking interactions
   }
 }
