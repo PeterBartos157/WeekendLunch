@@ -13,7 +13,7 @@ import { Auth, onAuthStateChanged, User } from '@angular/fire/auth';
 
 export class AppWrapperComponent {
   private auth = inject(Auth);
-  component: any = LoginComponent;
+  component: any = null;
 
   constructor() {
     onAuthStateChanged(this.auth, (user: User | null) => {
