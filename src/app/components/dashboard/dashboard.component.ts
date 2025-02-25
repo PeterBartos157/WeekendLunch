@@ -159,6 +159,7 @@ export class DashboardComponent implements OnInit {
           });
         }
         this.currentText = '';
+      // Rollback if errors
       } catch(error: any) {
         week.notes = backupNotes;
         console.error(error);
@@ -172,12 +173,20 @@ export class DashboardComponent implements OnInit {
   async removeNoteFromWeek(weekNumber: number, noteText: string): Promise<void> {
     const week = this.weeks.find(w => w.week === weekNumber);
     if (week) {
+      const backupNotes = Array.from(week.notes);
+      // Remove from frontend view
       week.notes = week.notes.filter(note => note.text !== noteText);
-      // Remove from firestre
-      const weekDocRef = doc(this.firestore, this.collectionName, `${weekNumber.toString()}-${this.currentYear.toString()}`);
-      await updateDoc(weekDocRef, {
-        notes: week.notes
-      });
+      // Remove from firestore
+      try {
+        const weekDocRef = doc(this.firestore, this.collectionName, `${weekNumber.toString()}-${this.currentYear.toString()}`);
+        await updateDoc(weekDocRef, {
+          notes: week.notes
+        });
+      // Rollback if errors
+      } catch (error: any) {
+        week.notes = backupNotes;
+        console.error(error);
+      }
     }
   }
 
@@ -185,18 +194,43 @@ export class DashboardComponent implements OnInit {
   async voteForNoteFromWeek(weekNumber: number, note: {text: string, creator: string, voters: string[]} ): Promise<void> {
     const week = this.weeks.find(w => w.week === weekNumber);
     if (week) {
+      const backupNotes = Array.from(week.notes);
       const userEmail = this.email;
-      console.log(note);
-      // Remove vote if already voted for this note
-      if (note.voters.includes(userEmail)) note.voters = note.voters.filter(voter => voter !== userEmail);
-      // Add note if user has not voted for this note yet
-      else note.voters.push(userEmail);
-      console.log(note);
-      // Remove from firestre
-      const weekDocRef = doc(this.firestore, this.collectionName, `${weekNumber.toString()}-${this.currentYear.toString()}`);
-      await updateDoc(weekDocRef, {
-        notes: week.notes
-      });
+      try {
+        // Remove vote if already voted for this note
+        if (note.voters.includes(userEmail)) note.voters = note.voters.filter(voter => voter !== userEmail);
+        // Add note if user has not voted for this note yet
+        else note.voters.push(userEmail);
+        // Remove from firestore
+        const weekDocRef = doc(this.firestore, this.collectionName, `${weekNumber.toString()}-${this.currentYear.toString()}`);
+        await updateDoc(weekDocRef, {
+          notes: week.notes
+        });
+      // Rollback if errors
+      } catch (error: any) {
+          week.notes = backupNotes;
+          console.error(error);
+      }
+    }
+  }
+
+  // Set winner for note from a specific week
+  async setWinNote(weekNumber: number, noteText: string): Promise<void> {
+    const week = this.weeks.find(w => w.week === weekNumber);
+    if (week) {
+      const backupNoteWon = week.won.slice(0, week.won.length);
+      try {
+        week.won = noteText;
+        // Update firestore record
+        const weekDocRef = doc(this.firestore, this.collectionName, `${weekNumber.toString()}-${this.currentYear.toString()}`);
+        await updateDoc(weekDocRef, {
+          won: noteText
+        });
+      // Rollback if errors
+      } catch (error: any) {
+        week.won = backupNoteWon;
+        console.error(error);
+      }
     }
   }
 

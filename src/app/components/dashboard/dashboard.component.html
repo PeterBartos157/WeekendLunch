@@ -17,9 +17,14 @@
           <li *ngFor="let note of week.notes">
             <div *ngIf="note.text != week.won" [class]="haveVotedFor(note) || haveCreatedNote(note.creator) ? 'note-voted' : 'note'">
 
+              <button *ngIf="week.week >= currentWeek && email === 'peterbartos17@gmail.com'"
+                (click)="setWinNote(week.week, note.text)" class="vote-btn">
+                <span (mouseenter)="showTooltip($event, 'uzatvoriť pre tento víkend')" (mouseleave)="hideTooltip()">☑️</span>
+              </button>
+
               <button *ngIf="week.week >= currentWeek" (click)="voteForNoteFromWeek(week.week, note)"
                 [class]="haveCreatedNote(note.creator) ? 'blocked-btn' : 'vote-btn'" [disabled]="haveCreatedNote(note.creator)">
-                <span (mouseenter)="showTooltip($event, note.voters.length.toString(), 2)" (mouseleave)="hideTooltip()">🗳️</span>
+                <span (mouseenter)="showTooltip($event, (note.voters.length + 1).toString(), 2)" (mouseleave)="hideTooltip()">🗳️</span>
               </button>
 
               <span (mouseenter)="showTooltip($event, note.creator, 1)" (mouseleave)="hideTooltip()">{{ note.text }}</span>
@@ -31,7 +36,7 @@
               <span *ngIf="week.week < currentWeek" class="past-note"></span>
             </div>
             <div *ngIf="note.text === week.won" class="note-won">
-              <span (mouseenter)="showTooltip($event, note.creator)" (mouseleave)="hideTooltip()">{{ week.won }}</span>
+              <span (mouseenter)="showTooltip($event, note.creator, 1)" (mouseleave)="hideTooltip()">{{ week.won }}</span>
               <button (mouseenter)="showTooltip($event, 'navarené')" (mouseleave)="hideTooltip()" class="remove-btn">✅</button>
             </div>
           </li>

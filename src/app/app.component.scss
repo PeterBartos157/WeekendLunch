@@ -47,3 +47,15 @@
   font-size: 1.2em;
   z-index: 1000; /* Ensure it stays above other content */
 }
+
+@media (max-width: 768px) {
+  .content {
+    margin-top: 180px;
+  }
+}
+
+@media (max-width: 440px) {
+  .content {
+    margin-top: 260px;
+  }
+}
