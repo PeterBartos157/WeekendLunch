@@ -44,7 +44,7 @@ export class DashboardComponent implements OnInit {
   auth: Auth = inject(Auth);
   email: string = this.auth.currentUser?.email ?? '';
   firestore: Firestore = inject(Firestore);
-  collectionName: string = 'foodWeeks';
+  collectionName: string = 'foodWeeks' // 'foodWeeksDev';
 
   constructor() {
     const currentDate = new Date();

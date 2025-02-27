@@ -6,7 +6,7 @@
       <span><strong>{{ week.week }}. týždeň </strong>({{ week.dateRange }})</span>
 
       <!-- Only show input for the current and future weeks -->
-      <input *ngIf="week.week > currentWeek && week.notes.length < maxNoteLength" [(ngModel)]="currentText"
+      <input *ngIf="week.week >= currentWeek && week.notes.length < maxNoteLength" [(ngModel)]="currentText"
         placeholder="Napíš jedlo" (keyup.enter)="addNoteToWeek(week.week, currentText)"
         [maxlength]="maxNoteTextLength" [disabled]="disableInput"/>
       <input *ngIf="week.week > currentWeek && week.notes.length >= maxNoteLength"
