@@ -61,11 +61,11 @@ export class DashboardComponent implements OnInit {
 
   // Function to get the current week number
   getWeekNumber(date: Date): number {
-    const startDate = new Date(date.getFullYear(), 0, 1);
+    const startDate = new Date(date.getFullYear(), 0, 0);
     const diff = date.getTime() - startDate.getTime();
     const oneDay = 1000 * 3600 * 24;
-    const dayOfYear = Math.floor(diff / oneDay);
-    return Math.ceil((dayOfYear + 1) / 7); // Calculate the week number
+    const dayOfYear = Math.floor(diff / oneDay) + 1;
+    return Math.ceil((dayOfYear) / 7); // Calculate the week number
   }
 
   // Function to generate weeks in a year along with their date range

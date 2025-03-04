@@ -9,7 +9,7 @@
       <input *ngIf="week.week >= currentWeek && week.notes.length < maxNoteLength" [(ngModel)]="currentText"
         placeholder="Napíš jedlo" (keyup.enter)="addNoteToWeek(week.week, currentText)"
         [maxlength]="maxNoteTextLength" [disabled]="disableInput"/>
-      <input *ngIf="week.week > currentWeek && week.notes.length >= maxNoteLength"
+      <input *ngIf="week.week >= currentWeek && week.notes.length >= maxNoteLength"
         [(ngModel)]="currentText" placeholder="Maximum dosiahnuté" disabled class="input-warning"/>
 
       <div class="notes">
